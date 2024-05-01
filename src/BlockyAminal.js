@@ -20,10 +20,23 @@ var FSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform int u_whichTexture;
   void main() {
-    gl_FragColor = u_FragColor;
-    gl_FragColor = vec4(v_UV, 1.0, 1.0);
-    gl_FragColor = texture2D(u_Sampler0, v_UV);
+
+    if(u_whichTexture == -2){
+      gl_FragColor = u_FragColor;
+    }
+    else if(u_whichTexture == -1){
+      gl_FragColor = vec4(v_UV, 1.0, 1.0);
+
+    }
+    else if(u_whichTexture == 0){
+
+      gl_FragColor = texture2D(u_Sampler0, v_UV);
+    }
+    else{
+      gl_FragColor = vec4(1,0.2,0.2,1);
+    }
   }`
 
 let canvas;
@@ -37,6 +50,7 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
+let u_whichTexture;
 
 function setupWebGl(){
     // Retrieve <canvas> element
@@ -111,6 +125,13 @@ function connectVariablesToGLSL(){
     console.log('Failed to get the storage location of u_Sampler0');
     return false;
   }
+
+  u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
+  if(!u_whichTexture) {
+    console.log('Failed to get the storage location of u_whichTexture');
+    return false;
+  }
+
 
   
 
@@ -205,9 +226,10 @@ function sendIamgeToTEXTURE0(image) {
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
 
   // Set the texture unit 0 to the sampler
-  gl.uniform1i(u_Sampler, 0);
+  gl.uniform1i(u_Sampler0, 0);
 
   console.log('finished loadTexture');
+  renderAllShapes();
 
 }
 
@@ -319,9 +341,30 @@ function renderAllShapes(){
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+  var floor = new Cube();
+  floor.color=[0.1,0.1,1,1.0];
+  floor.textureNum=0;
+  floor.matrix.translate(0.40,-0.95,-0.50);
+  floor.matrix.scale(100,0.01,10);
+  floor.matrix.translate(0,-0.5,0);
+  floor.render();
+
+  var erightFoot = new Cube();
+  erightFoot.color=[0.2,0.2,0.2,1.0];
+  erightFoot.textureNum=-2;
+  erightFoot.matrix.translate(0.40,-0.95,-0.50);
+  erightFoot.matrix.rotate(g_bodyAngle2,0,1,0);
+  //var rightFootCoord = new Matrix4(rightFoot.matrix);
+  erightFoot.matrix.scale(0.4,0.2,0.5);
+  erightFoot.render();
+
+
+
+
   //Right Foot
   var rightFoot = new Cube();
   rightFoot.color=[0.2,0.2,0.2,1.0];
+  rightFoot.textureNum=-2;
   rightFoot.matrix.translate(0.20,-0.95,-0.50);
   rightFoot.matrix.rotate(g_bodyAngle2,0,1,0);
   var rightFootCoord = new Matrix4(rightFoot.matrix);
@@ -330,6 +373,8 @@ function renderAllShapes(){
   //Left Foot
   var leftFoot = new Cube();
   leftFoot.color=[0.2,0.2,0.2,1.0];
+  leftFoot.textureNum=-2;
+
   leftFoot.matrix.translate(-0.60,-0.95,-0.5);
   leftFoot.matrix.rotate(g_bodyAngle2,0,1,0);
   var leftFootCoord = new Matrix4(leftFoot.matrix);
@@ -341,6 +386,8 @@ function renderAllShapes(){
   //BottmRightLeg
   var bRightleg = new Cube();
   bRightleg.color=[0.19,0.19,0.19,1.0];
+  bRightleg.textureNum=0;
+
   bRightleg.matrix = rightFootCoord;
   bRightleg.matrix.translate(0.0,0.2,0.1);
   bRightleg.matrix.rotate(g_legAngle,1,0,0);
@@ -358,6 +405,8 @@ function renderAllShapes(){
   //BottmLeftLeg
   var bLeftleg = new Cube();
   bLeftleg.color=[0.23,0.23,0.23,1.0];
+  bLeftleg.textureNum=0;
+
   bLeftleg.matrix = leftFootCoord;
   bLeftleg.matrix.translate(0.0,0.2,0.1);
   bLeftleg.matrix.rotate(g_legAngle,1,0,0);
@@ -489,6 +538,7 @@ function renderAllShapes(){
   //Peck
   var peck = new Cube();
   peck.color=[0.2,0.2,0.2,1.0];
+  peck.textureNum=-2;
   peck.matrix = chestCoord;
   peck.matrix.translate(0.15,0.50,-0.05);
   peck.matrix.scale(0.8,0.8,0.1);
@@ -506,6 +556,7 @@ function renderAllShapes(){
   //Head
   var head = new Cube();
   head.color=[0.2,0.2,0.2,1.0];
+  head.textureNum=0;
   neckCoord.translate(0.5,0,0.2);
   head.matrix = neckCoord;
   //var testy =neckCoord;

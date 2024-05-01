@@ -37,10 +37,15 @@ class Cube {//I had a big bug and Claude AI helped me fix it, this.vertices and 
         1, 0, 1, 1, 0, 1,
         1, 0, 0, 0, 0, 1,
       ];
+      this.textureNum = -1;
+
     }
   
     render() {
       var rgba = this.color;
+      console.log("Cube textureNum:", this.textureNum); // Add this line
+      gl.uniform1i(u_whichTexture,this.textureNum);
+
       gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
       gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
   
