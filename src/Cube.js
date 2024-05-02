@@ -43,8 +43,9 @@ class Cube {//I had a big bug and Claude AI helped me fix it, this.vertices and 
   
     render() {
       var rgba = this.color;
-      console.log("Cube textureNum:", this.textureNum); // Add this line
       gl.uniform1i(u_whichTexture,this.textureNum);
+
+      
 
       gl.uniform4f(u_FragColor, rgba[0], rgba[1], rgba[2], rgba[3]);
       gl.uniformMatrix4fv(u_ModelMatrix, false, this.matrix.elements);
@@ -62,7 +63,6 @@ class Cube {//I had a big bug and Claude AI helped me fix it, this.vertices and 
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.uv), gl.STATIC_DRAW);
       gl.vertexAttribPointer(a_UV, 2, gl.FLOAT, false, 0, 0);
       gl.enableVertexAttribArray(a_UV);
-  
       // Draw the triangles
       gl.drawArrays(gl.TRIANGLES, 0, 36);
     }

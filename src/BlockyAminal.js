@@ -20,6 +20,7 @@ var FSHADER_SOURCE = `
   varying vec2 v_UV;
   uniform vec4 u_FragColor;
   uniform sampler2D u_Sampler0;
+  uniform sampler2D u_Sampler1;
   uniform int u_whichTexture;
   void main() {
 
@@ -28,11 +29,14 @@ var FSHADER_SOURCE = `
     }
     else if(u_whichTexture == -1){
       gl_FragColor = vec4(v_UV, 1.0, 1.0);
-
     }
     else if(u_whichTexture == 0){
 
       gl_FragColor = texture2D(u_Sampler0, v_UV);
+    }
+    else if(u_whichTexture == -3){
+
+      gl_FragColor = texture2D(u_Sampler1, v_UV);
     }
     else{
       gl_FragColor = vec4(1,0.2,0.2,1);
@@ -50,6 +54,7 @@ let u_ProjectionMatrix;
 let u_ViewMatrix;
 let u_GlobalRotateMatrix;
 let u_Sampler0;
+let u_Sampler1;
 let u_whichTexture;
 
 function setupWebGl(){
@@ -120,11 +125,17 @@ function connectVariablesToGLSL(){
     return;
   }
 
-  var u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
+  u_Sampler0 = gl.getUniformLocation(gl.program, 'u_Sampler0');
   if (!u_Sampler0) {
     console.log('Failed to get the storage location of u_Sampler0');
     return false;
   }
+
+  u_Sampler1 = gl.getUniformLocation(gl.program, 'u_Sampler1');
+    if(!u_Sampler1){
+      console.log('Failed to get the storage location of u_Sampler1');
+      return false;
+    }
 
   u_whichTexture = gl.getUniformLocation(gl.program, 'u_whichTexture');
   if(!u_whichTexture) {
@@ -191,23 +202,35 @@ function addActionsForHtmlUI(){
 
 }   
 
-function initTextures(gl, n) {
+function initTextures() {
   
   
   var image = new Image();  // Create the image object
+  var image1= new Image();
   if (!image) {
     console.log('Failed to create the image object');
     return false;
   }
+  if (!image1) {
+    console.log('Failed to create the image object');
+    return false;
+  }
+  
   // Register the event handler to be called on loading an image
-  image.onload = function() {sendIamgeToTEXTURE0(image);};
-  // Tell the browser to load an image
-  image.src = './sky.jpg';
+  image.onload = function() {sendImageToTEXTURE0(image);};
+
+  image.src = './lizardSkin.jpg';
+
+  image1.onload = function() {sendImageToTEXTURE1(image1);};
+  image1.src = './sky.jpg';
+
 
   return true;
 }
 
-function sendIamgeToTEXTURE0(image) {
+
+
+function sendImageToTEXTURE0(image) {
   
   var texture = gl.createTexture();   // Create a texture object
   if (!texture) {
@@ -230,6 +253,31 @@ function sendIamgeToTEXTURE0(image) {
 
   console.log('finished loadTexture');
   renderAllShapes();
+}
+
+function sendImageToTEXTURE1(image) {
+  console.log('image:', image);
+  var texture = gl.createTexture();   // Create a texture object
+  if (!texture) {
+    console.log('Failed to create the texture object');
+    return false;
+  }
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);  // Flip the image's y axis
+  // Enable texture unit0
+  gl.activeTexture(gl.TEXTURE1);
+  // Bind the texture object to the target
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Set the texture parameters
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  // Set the texture image
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+
+  // Set the texture unit 0 to the sampler
+  gl.uniform1i(u_Sampler1, 1);
+
+  console.log('finished loadTexture1');
+  renderAllShapes();
 
 }
 
@@ -239,8 +287,8 @@ function main() {
     connectVariablesToGLSL();
     addActionsForHtmlUI();
 
-    initTextures(gl, 0);
-  
+    initTextures();
+    console.log('u_whichTexture value:', u_whichTexture);
   canvas.onmousedown = function(ev) {
     if (ev.shiftKey) {
         poke = true;
@@ -423,6 +471,7 @@ function renderAllShapes(){
   //TopRightLeg
   var tRightleg = new Cube();
   tRightleg.color=[0.21,0.21,0.21,1.0];
+  tRightleg.textureNum=-3;
   tRightleg.matrix = rightLegCoord;
   tRightleg.matrix.translate(0,0.60,-0.01);
   tRightleg.matrix.rotate(-g_legAngle*1.5,1,0,0);
@@ -440,6 +489,7 @@ function renderAllShapes(){
   //TopLeftLeg
   var tLeftleg = new Cube();
   tLeftleg.color=[0.22,0.22,0.22,1.0];
+  tLeftleg.textureNum=-3;
   tLeftleg.matrix = leftLegCoord;
   tLeftleg.matrix.translate(0,0.60,-0.01);
   tLeftleg.matrix.rotate(-g_legAngle*1.5,1,0,0);
@@ -487,6 +537,7 @@ function renderAllShapes(){
   //ArmRight
   var armRight = new Cube();
   armRight.color=[0.2,0.2,0.2,1.0];
+  armRight.textureNum=-3;
   armRight.matrix = bodyCoorArmRight;
   armRight.matrix.translate(1,0.90,0.1);
   if(g_animation==true&&poke==true){
@@ -507,6 +558,8 @@ function renderAllShapes(){
   //ArmLeft
   var armLeft = new Cube();
   armLeft.color=[0.2,0.2,0.2,1.0];
+  armLeft.textureNum=-3;
+
   armLeft.matrix = bodyCoorArmLeft;
   armLeft.matrix.translate(-0.4,0.90,0.1);
   if(g_animation==true&&poke==true){
