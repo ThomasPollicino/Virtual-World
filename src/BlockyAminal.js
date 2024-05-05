@@ -588,7 +588,7 @@ function renderAllShapes(){
   var chest = new Cube();
   chest.color=[0.2,0.2,0.2,1.0];
   chest.matrix = bodyCoorChest;
-  chest.matrix.translate(0,0.25,-0.25);
+  chest.matrix.translate(0.01,0.25,-0.25);
   var chestCoord = new Matrix4(chest.matrix);
   chest.matrix.scale(1,1.4,0.2);
   chest.render();
