@@ -353,14 +353,19 @@ function tick() {
   }
 }
 
+var g_eye=[0,1.5,3];
+var g_at=[0,0,-100];
+var g_up=[0,1,0];
 
 function renderAllShapes(){
   var startTime = performance.now();
 
-  var prijMat=new Matrix4();
-  gl.uniformMatrix4fv(u_ProjectionMatrix, false, prijMat.elements);
+  var projMat=new Matrix4();
+  projMat.setPerspective(90, canvas.width/canvas.height, .1, 100);
+  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projMat.elements);
 
   var viewMat=new Matrix4();
+  viewMat.setLookAt(g_eye[0], g_eye[1], g_eye[2], g_at[0], g_at[1], g_at[2], g_up[0], g_up[1], g_up[2]);
   gl.uniformMatrix4fv(u_ViewMatrix, false, viewMat.elements);
 
   var globalRotMat = new Matrix4().rotate(g_globalAngle, 0, 1, 0);
@@ -369,7 +374,7 @@ function renderAllShapes(){
     var rotationAngle = (g_seconds) * 100; 
     globalRotMat.rotate(rotationAngle, 0, 1, 0);
     
-  }
+  } 
   if(g_animation==true){
     if(g_seconds>37){
       var rotationAngle = (g_seconds - 37) * 20; 
@@ -380,31 +385,29 @@ function renderAllShapes(){
   gl.uniformMatrix4fv(u_GlobalRotateMatrix, false, globalRotMat.elements);
 
   var zoomFactor = 2.5; 
-  var projectionMatrix = new Matrix4();
-  projectionMatrix.setIdentity();
-  projectionMatrix.scale(1 / zoomFactor, 1 / zoomFactor, 1/zoomFactor);
-  projectionMatrix.translate(0, -1, 0); 
+  //var projectionMatrix = new Matrix4();
+  //projectionMatrix.setIdentity();
+  //projectionMatrix.scale(1 / zoomFactor, 1 / zoomFactor, 1/zoomFactor);
+  //projectionMatrix.translate(0, -1, 0); 
 
-  gl.uniformMatrix4fv(u_ProjectionMatrix, false, projectionMatrix.elements);
+  //gl.uniformMatrix4fv(u_ProjectionMatrix, false, projectionMatrix.elements);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   var floor = new Cube();
   floor.color=[0.1,0.1,1,1.0];
-  floor.textureNum=0;
-  floor.matrix.translate(0.40,-0.95,-0.50);
-  floor.matrix.scale(100,0.01,10);
-  floor.matrix.translate(0,-0.5,0);
+  floor.textureNum=-3;
+  floor.matrix.translate(0.0,-0.95,0);
+  floor.matrix.scale(100,0.01,100);
+  floor.matrix.translate(-0.5,-0.5,-0.5);
   floor.render();
 
-  var erightFoot = new Cube();
-  erightFoot.color=[0.2,0.2,0.2,1.0];
-  erightFoot.textureNum=-2;
-  erightFoot.matrix.translate(0.40,-0.95,-0.50);
-  erightFoot.matrix.rotate(g_bodyAngle2,0,1,0);
-  //var rightFootCoord = new Matrix4(rightFoot.matrix);
-  erightFoot.matrix.scale(0.4,0.2,0.5);
-  erightFoot.render();
+  var sky = new Cube();
+  sky.color=[0.1,0.1,1,1.0];
+  sky.matrix.scale(50,50,50);
+  sky.matrix.translate(-0.5,-0.5,-0.5);
+  sky.render();
+
 
 
 
@@ -416,7 +419,8 @@ function renderAllShapes(){
   rightFoot.matrix.translate(0.20,-0.95,-0.50);
   rightFoot.matrix.rotate(g_bodyAngle2,0,1,0);
   var rightFootCoord = new Matrix4(rightFoot.matrix);
-  rightFoot.matrix.scale(0.4,0.2,0.5);
+  rightFoot.matrix.translate(-0.01,0,0);
+  rightFoot.matrix.scale(0.43,0.2,0.5);
   rightFoot.render();
   //Left Foot
   var leftFoot = new Cube();
@@ -426,8 +430,9 @@ function renderAllShapes(){
   leftFoot.matrix.translate(-0.60,-0.95,-0.5);
   leftFoot.matrix.rotate(g_bodyAngle2,0,1,0);
   var leftFootCoord = new Matrix4(leftFoot.matrix);
+  leftFoot.matrix.translate(-0.01,0,0); 
 
-  leftFoot.matrix.scale(0.4,0.2,0.5);
+  leftFoot.matrix.scale(0.43,0.2,0.5);
   leftFoot.render();
 
 
@@ -601,7 +606,7 @@ function renderAllShapes(){
   var neck = new Cube();
   neck.color=[0.2,0.2,0.2,1.0];
   neck.matrix = bodyCoorNeck;
-  neck.matrix.translate(0.25,1.6,-0.25);
+  neck.matrix.translate(0.25,1.6,-0.26);
   var neckCoord = new Matrix4(neck.matrix);
   neck.matrix.scale(0.6,0.17,0.5);
   neck.render();
